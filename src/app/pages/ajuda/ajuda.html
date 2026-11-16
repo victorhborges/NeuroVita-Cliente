@@ -1,0 +1,42 @@
+<div class="pg aj">
+  <app-titulo-pagina titulo="Ajuda" subtitulo="Encontre respostas, tire suas dúvidas e aprenda a usar o NeuroVita" />
+
+  <section class="aj-banner" aria-label="Como podemos ajudar">
+    <div class="aj-banner-texto">
+      <h2>Como podemos ajudar ?</h2>
+      <p>Pesquise por um tópico ou explore nossas opções abaixo.</p>
+      <label class="aj-busca">
+        <input type="search" placeholder="Pesquisar na ajuda..." aria-label="Pesquisar na ajuda" [value]="busca()" (input)="busca.set($any($event.target).value)" />
+        <app-icone nome="busca" />
+      </label>
+    </div>
+    <img class="aj-banner-img" src="img/ajuda/assistente.png" alt="" />
+  </section>
+
+  <div class="cartao aj-corpo">
+    <div class="aj-topicos">
+      @for (t of topicos(); track t.id) {
+        <a class="aj-topico" [routerLink]="[raiz(), t.id]">
+          <app-icone [nome]="t.icone" />
+          <span class="aj-topico-texto"><strong>{{ t.titulo }}</strong><span>{{ t.descricao }}</span></span>
+          <app-icone nome="seta-direita" />
+        </a>
+      } @empty {
+        <p class="aj-vazio">Nenhum tópico encontrado para "{{ busca() }}".</p>
+      }
+    </div>
+
+    <div class="aj-contato">
+      <section class="aj-bloco">
+        <h3><app-icone nome="fone" /> Fale conosco</h3>
+        <p>Ainda com dúvidas? Nossa equipe está pronta para ajudar!</p>
+        <a class="aj-botao" [routerLink]="[raiz(), 'fale-conosco']"><app-icone nome="email" /> <span>Enviar mensagem</span> <app-icone nome="seta-direita" /></a>
+      </section>
+      <section class="aj-bloco">
+        <h3><app-icone nome="balao" /> Suporte</h3>
+        <p>Atendimento de segunda a sexta, das 08h às 18h.</p>
+        <a class="aj-botao" [href]="telefoneLink"><app-icone nome="telefone" /> <span>{{ telefone }}</span></a>
+      </section>
+    </div>
+  </div>
+</div>

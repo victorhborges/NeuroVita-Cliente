@@ -1,0 +1,268 @@
+package com.neurovita.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.neurovita.dto.DiagnosticoRequest;
+import com.neurovita.model.Diagnostico;
+import com.neurovita.model.Usuario;
+import com.neurovita.model.VinculoProfissionalPaciente;
+import com.neurovita.repository.DiagnosticoRepository;
+import com.neurovita.repository.PacienteRepository;
+import com.neurovita.repository.ProfissionalRepository;
+import com.neurovita.repository.UsuarioRepository;
+import com.neurovita.repository.VinculoProfissionalPacienteRepository;
+
+@ExtendWith(MockitoExtension.class)
+class DiagnosticoServiceTest {
+
+    @Mock private DiagnosticoRepository diagnosticoRepository;
+    @Mock private PacienteRepository pacienteRepository;
+    @Mock private ProfissionalRepository profissionalRepository;
+    @Mock private UsuarioRepository usuarioRepository;
+    @Mock private VinculoProfissionalPacienteRepository vinculoRepository;
+
+    @InjectMocks private DiagnosticoService service;
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void autenticarProfissional(String email, String profissionalId) {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                email, "token", List.of(new SimpleGrantedAuthority("ROLE_PROFISSIONAL")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        Usuario usuario = new Usuario();
+        usuario.setEntidadeId(profissionalId);
+        usuario.setEmail(email);
+        lenient().when(usuarioRepository.findByEmailIgnoreCase(email)).thenReturn(Optional.of(usuario));
+    }
+
+    private void autenticarAdmin() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "admin@neurovita.test", "token", List.of(new SimpleGrantedAuthority("ROLE_ADMINISTRADOR")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private void autenticarSecretaria() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "secretaria@neurovita.test", "token", List.of(new SimpleGrantedAuthority("ROLE_SECRETARIA")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @Test
+    void profissionalComVinculoAtivoLeDiagnosticosDeOutroProfissional() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull("pac-1", "prof-1"))
+                .thenReturn(Optional.of(new VinculoProfissionalPaciente()));
+
+        Diagnostico diagOutroAutor = new Diagnostico();
+        diagOutroAutor.setId("d1");
+        diagOutroAutor.setPacienteId("pac-1");
+        diagOutroAutor.setProfissionalId("prof-2");
+        diagOutroAutor.setDescricao("Diagnóstico feito por prof-2");
+
+        when(diagnosticoRepository.findByPacienteId("pac-1")).thenReturn(List.of(diagOutroAutor));
+
+        var lista = service.listarPorPaciente("pac-1");
+
+        assertEquals(1, lista.size());
+        assertEquals("prof-2", lista.get(0).getProfissionalId());
+        assertEquals("Diagnóstico feito por prof-2", lista.get(0).getDescricao());
+    }
+
+    @Test
+    void profissionalSemVinculoAtivoNaoLeDiagnosticosDoPaciente() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull("pac-1", "prof-1"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(AccessDeniedException.class, () -> service.listarPorPaciente("pac-1"));
+        verifyNoInteractions(diagnosticoRepository);
+    }
+
+    @Test
+    void secretariaPodeConsultarDiagnosticosMostradosNoProntuarioCliente() {
+        autenticarSecretaria();
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        when(diagnosticoRepository.findByPacienteId("pac-1")).thenReturn(List.of());
+
+        assertTrue(service.listarPorPaciente("pac-1").isEmpty());
+        verifyNoInteractions(vinculoRepository);
+    }
+
+    @Test
+    void secretariaNaoPodeCriarDiagnosticosSemOperacaoNaSuaTela() {
+        autenticarSecretaria();
+
+        assertThrows(AccessDeniedException.class, () -> service.salvar(new DiagnosticoRequest()));
+        verifyNoInteractions(diagnosticoRepository, pacienteRepository, profissionalRepository, vinculoRepository);
+    }
+
+    @Test
+    void secretariaNaoPodeConsultarDiagnosticoPorIdForaDaSuaTela() {
+        autenticarSecretaria();
+
+        assertThrows(AccessDeniedException.class, () -> service.buscarPorId("diag-1"));
+        verifyNoInteractions(diagnosticoRepository);
+    }
+
+    @Test
+    void listarTodosNaoExpõeDiagnosticosApósEncerramentoDoVinculo() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+        Diagnostico anterior = new Diagnostico();
+        anterior.setPacienteId("pac-1");
+        anterior.setProfissionalId("prof-1");
+        when(vinculoRepository.findByProfissionalIdAndEncerradoEmIsNull("prof-1"))
+                .thenReturn(List.of());
+        when(diagnosticoRepository.findAll()).thenReturn(List.of(anterior));
+
+        assertTrue(service.listarTodos().isEmpty());
+    }
+
+    @Test
+    void profissionalComVinculoAtivoNaoPodeEditarDiagnosticoDeOutroAutor() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+
+        Diagnostico diagOutroAutor = new Diagnostico();
+        diagOutroAutor.setId("d1");
+        diagOutroAutor.setPacienteId("pac-1");
+        diagOutroAutor.setProfissionalId("prof-2");
+
+        when(diagnosticoRepository.findById("d1")).thenReturn(Optional.of(diagOutroAutor));
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull("pac-1", "prof-1"))
+                .thenReturn(Optional.of(new VinculoProfissionalPaciente()));
+
+        DiagnosticoRequest request = new DiagnosticoRequest();
+        request.setPacienteId("pac-1");
+        request.setProfissionalId("prof-1");
+        request.setDescricao("Tentativa de alteracao");
+
+        assertThrows(AccessDeniedException.class, () -> service.atualizar("d1", request));
+    }
+
+    @Test
+    void profissionalComVinculoAtivoPodeEditarProprioDiagnostico() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+
+        Diagnostico meuDiag = new Diagnostico();
+        meuDiag.setId("d1");
+        meuDiag.setPacienteId("pac-1");
+        meuDiag.setProfissionalId("prof-1");
+        meuDiag.setDescricao("Desc original");
+        meuDiag.setCid("F84.0");
+
+        when(diagnosticoRepository.findById("d1")).thenReturn(Optional.of(meuDiag));
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull("pac-1", "prof-1"))
+                .thenReturn(Optional.of(new VinculoProfissionalPaciente()));
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        when(profissionalRepository.existsById("prof-1")).thenReturn(true);
+        when(diagnosticoRepository.save(any(Diagnostico.class))).thenAnswer(i -> i.getArgument(0));
+
+        DiagnosticoRequest request = new DiagnosticoRequest();
+        request.setPacienteId("pac-1");
+        request.setProfissionalId("prof-1");
+        request.setDescricao("Desc atualizada");
+        request.setCid("F90.0");
+
+        var response = service.atualizar("d1", request);
+        assertEquals("Desc atualizada", response.getDescricao());
+        assertEquals("F90.0", response.getCid());
+        verify(diagnosticoRepository).save(meuDiag);
+    }
+
+    @Test
+    void atualizarSemCidPreservaCodigoExistente() {
+        autenticarAdmin();
+        Diagnostico diagnostico = new Diagnostico();
+        diagnostico.setId("d1");
+        diagnostico.setPacienteId("pac-1");
+        diagnostico.setProfissionalId("prof-1");
+        diagnostico.setDescricao("Descrição antiga");
+        diagnostico.setCid("F84.0");
+        when(diagnosticoRepository.findById("d1")).thenReturn(Optional.of(diagnostico));
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        when(profissionalRepository.existsById("prof-1")).thenReturn(true);
+        when(diagnosticoRepository.save(any(Diagnostico.class))).thenAnswer(i -> i.getArgument(0));
+
+        DiagnosticoRequest request = new DiagnosticoRequest();
+        request.setPacienteId("pac-1");
+        request.setProfissionalId("prof-1");
+        request.setDescricao("Descrição revisada");
+
+        assertEquals("F84.0", service.atualizar("d1", request).getCid());
+    }
+
+    @Test
+    void administradorPodeAcessarMesmoSemVinculo() {
+        autenticarAdmin();
+        when(pacienteRepository.existsById("pac-1")).thenReturn(true);
+        Diagnostico d = new Diagnostico();
+        d.setPacienteId("pac-1");
+        d.setProfissionalId("prof-qualquer");
+        when(diagnosticoRepository.findByPacienteId("pac-1")).thenReturn(List.of(d));
+
+        var lista = service.listarPorPaciente("pac-1");
+        assertEquals(1, lista.size());
+    }
+
+    @Test
+    void exclusaoArquivaDiagnosticoSemApagarHistorico() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+        Diagnostico diagnostico = new Diagnostico();
+        diagnostico.setId("d1");
+        diagnostico.setPacienteId("pac-1");
+        diagnostico.setProfissionalId("prof-1");
+        when(diagnosticoRepository.findById("d1")).thenReturn(Optional.of(diagnostico));
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull(
+                "pac-1", "prof-1")).thenReturn(Optional.of(new VinculoProfissionalPaciente()));
+        when(diagnosticoRepository.save(any(Diagnostico.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.deletar("d1");
+
+        assertFalse(diagnostico.isAtivo());
+        assertNotNull(diagnostico.getArquivadoEm());
+        verify(diagnosticoRepository).save(diagnostico);
+        verify(diagnosticoRepository, never()).delete(any());
+    }
+
+    @Test
+    void diagnosticoArquivadoNaoPodeSerAtualizado() {
+        autenticarProfissional("prof1@neurovita.test", "prof-1");
+        Diagnostico diagnostico = new Diagnostico();
+        diagnostico.setId("d1");
+        diagnostico.setPacienteId("pac-1");
+        diagnostico.setProfissionalId("prof-1");
+        diagnostico.setAtivo(false);
+        when(diagnosticoRepository.findById("d1")).thenReturn(Optional.of(diagnostico));
+        when(vinculoRepository.findFirstByPacienteIdAndProfissionalIdAndEncerradoEmIsNull(
+                "pac-1", "prof-1")).thenReturn(Optional.of(new VinculoProfissionalPaciente()));
+        DiagnosticoRequest request = new DiagnosticoRequest();
+        request.setPacienteId("pac-1");
+        request.setProfissionalId("prof-1");
+        request.setDescricao("Atualização");
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> service.atualizar("d1", request));
+        verify(diagnosticoRepository, never()).save(any());
+    }
+}

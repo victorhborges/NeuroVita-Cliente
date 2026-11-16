@@ -1,0 +1,44 @@
+package com.neurovita.controller;
+
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import com.neurovita.dto.DocumentoClinicoRequest;
+import com.neurovita.dto.DocumentoClinicoResponse;
+import com.neurovita.service.DocumentoClinicoService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/documentos-clinicos")
+public class DocumentoClinicoController {
+    private final DocumentoClinicoService service;
+    public DocumentoClinicoController(DocumentoClinicoService service) { this.service = service; }
+
+    @GetMapping("/paciente/{pacienteId}")
+    public List<DocumentoClinicoResponse> porPaciente(
+            @PathVariable String pacienteId,
+            @RequestParam(required = false) String secao,
+            Authentication auth) {
+        return service.porPacienteESecao(pacienteId, secao, auth);
+    }
+
+    @PostMapping
+    public ResponseEntity<DocumentoClinicoResponse> criar(@Valid @RequestBody DocumentoClinicoRequest request, Authentication auth) {
+        return ResponseEntity.status(201).body(service.salvar(null, request, auth));
+    }
+
+    @PutMapping("/{id}")
+    public DocumentoClinicoResponse atualizar(@PathVariable String id, @Valid @RequestBody DocumentoClinicoRequest request, Authentication auth) {
+        return service.salvar(id, request, auth);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Arquivar documento clínico",
+            description = "Preserva o registro e sua autoria no histórico; documentos arquivados não podem ser alterados.")
+    public ResponseEntity<Void> excluir(@PathVariable String id, Authentication auth) {
+        service.excluir(id, auth);
+        return ResponseEntity.noContent().build();
+    }
+}

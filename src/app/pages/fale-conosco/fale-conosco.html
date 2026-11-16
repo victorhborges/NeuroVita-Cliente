@@ -1,0 +1,26 @@
+<div class="pg">
+  <app-titulo-pagina titulo="Fale conosco" subtitulo="Ainda com dúvidas? Nossa equipe está pronta para ajudar!" [voltarPara]="voltar()" />
+
+  <form class="cartao fc" novalidate (submit)="$event.preventDefault(); enviar()">
+    <img class="fc-img" src="img/ajuda/atendente.png" alt="Atendente do suporte com fone de ouvido e notebook" />
+    <h2 class="fc-titulo">Envie sua mensagem</h2>
+
+    <label class="campo-form" [class.campo-form-erro]="tentou() && erros().nome">
+      <span class="campo-rotulo">Nome completo *</span>
+      <input type="text" autocomplete="name" placeholder="Digite seu nome" [value]="nome()" (input)="nome.set($any($event.target).value)" />
+      @if (tentou() && erros().nome) { <small class="campo-msg" role="alert">{{ erros().nome }}</small> }
+    </label>
+    <label class="campo-form" [class.campo-form-erro]="tentou() && erros().email">
+      <span class="campo-rotulo">E-mail</span>
+      <input type="email" autocomplete="email" placeholder="Digite seu e-mail" [value]="email()" (input)="email.set($any($event.target).value)" />
+      @if (tentou() && erros().email) { <small class="campo-msg" role="alert">{{ erros().email }}</small> }
+    </label>
+    <label class="campo-form" [class.campo-form-erro]="tentou() && erros().mensagem">
+      <span class="campo-rotulo">Mensagem</span>
+      <textarea rows="4" placeholder="Digite sua mensagem..." [value]="mensagem()" (input)="mensagem.set($any($event.target).value)"></textarea>
+      @if (tentou() && erros().mensagem) { <small class="campo-msg" role="alert">{{ erros().mensagem }}</small> }
+    </label>
+
+    <button type="submit" class="botao-escuro fc-enviar"><app-icone nome="aviao" /> Enviar mensagem</button>
+  </form>
+</div>

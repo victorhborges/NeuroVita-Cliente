@@ -1,0 +1,119 @@
+package com.neurovita.dto;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import com.neurovita.model.Paciente;
+import com.neurovita.model.VinculoResponsavel;
+import com.neurovita.model.VinculoProfissionalPaciente;
+
+public class PacienteResponse {
+
+    private String id;
+    private String nome;
+    private LocalDate dataNascimento;
+    private String email;
+    private String cpf;
+    private String telefone;
+    private String endereco;
+    private String cep;
+    private String cidade;
+    private Boolean ativo;
+
+    private List<VinculoResponsavelResponse> responsaveis;
+    private List<VinculoProfissionalPacienteResponse> profissionais;
+
+    private Boolean possuiPlanoSaude;
+    private String planoSaude;
+    private String numeroCarteirinha;
+    private LocalDate validadePlano;
+
+    public PacienteResponse(
+            Paciente paciente,
+            List<VinculoResponsavel> vinculos) {
+        this(paciente, vinculos, java.util.Collections.emptyList());
+    }
+
+    public PacienteResponse(
+            Paciente paciente,
+            List<VinculoResponsavel> vinculos,
+            List<VinculoProfissionalPaciente> vinculosProfissionais) {
+
+        this.id = paciente.getId();
+        this.nome = paciente.getNome();
+        this.dataNascimento = paciente.getDataNascimento();
+        this.email = paciente.getEmail();
+        this.cpf = paciente.getCpf();
+        this.telefone = paciente.getTelefone();
+        this.endereco = paciente.getEndereco();
+        this.cep = paciente.getCep();
+        this.cidade = paciente.getCidade();
+        this.ativo = paciente.getAtivo();
+
+        this.responsaveis = vinculos != null ? vinculos.stream()
+                .map(VinculoResponsavelResponse::new)
+                .toList() : java.util.Collections.emptyList();
+
+        this.profissionais = vinculosProfissionais != null ? vinculosProfissionais.stream()
+                .map(VinculoProfissionalPacienteResponse::new)
+                .toList() : java.util.Collections.emptyList();
+
+        this.possuiPlanoSaude = paciente.getPossuiPlanoSaude();
+        this.planoSaude = paciente.getPlanoSaude();
+        this.numeroCarteirinha = paciente.getNumeroCarteirinha();
+        this.validadePlano = paciente.getValidadePlano();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public String getEndereco() { return endereco; }
+    public String getCep() { return cep; }
+    public String getCidade() { return cidade; }
+    public Boolean getAtivo() { return ativo; }
+
+    public List<VinculoResponsavelResponse> getResponsaveis() {
+        return responsaveis;
+    }
+
+    public List<VinculoProfissionalPacienteResponse> getProfissionais() {
+        return profissionais;
+    }
+
+    public Boolean getPossuiPlanoSaude() {
+        return possuiPlanoSaude;
+    }
+
+    public String getPlanoSaude() {
+        return planoSaude;
+    }
+
+    public String getNumeroCarteirinha() {
+        return numeroCarteirinha;
+    }
+
+    public LocalDate getValidadePlano() {
+        return validadePlano;
+    }
+}

@@ -1,0 +1,26 @@
+<div class="pg aj">
+  @if (conteudo(); as c) {
+    <app-titulo-pagina [titulo]="c.titulo" [subtitulo]="c.subtitulo" [voltarPara]="voltar()" />
+
+    <section class="aj-banner aj-banner-topico" [attr.aria-label]="c.bannerTitulo">
+      <div class="aj-banner-texto">
+        <h2>{{ c.bannerTitulo }}</h2>
+        <p>{{ c.bannerTexto }}</p>
+      </div>
+    </section>
+
+    <div class="cartao aj-tutorial">
+      <ol class="aj-passos">
+        @for (passo of c.passos; track $index) {
+          <li><span class="aj-numero" aria-hidden="true">{{ $index + 1 }}</span><span [innerHTML]="passo"></span></li>
+        }
+        @if (c.dica) { <li class="aj-dica">{{ c.dica }}</li> }
+      </ol>
+      <figure class="aj-figura">
+        <img [src]="'img/ajuda/' + c.imagem" [alt]="c.legendaImagem" />
+      </figure>
+    </div>
+  } @else {
+    <app-titulo-pagina titulo="Tópico não encontrado" subtitulo="Esse tópico de ajuda não existe." [voltarPara]="voltar()" />
+  }
+</div>
