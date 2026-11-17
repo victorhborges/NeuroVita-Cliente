@@ -5,6 +5,7 @@ import { Aviso } from '../../shared/aviso/aviso';
 import { Clinica } from '../../shared/clinica/clinica';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Icone } from '../../shared/icone/icone';
+import { Avatar } from '../../shared/avatar/avatar';
 import { Perfil } from '../../shared/perfil';
 import { TituloPagina } from '../../shared/titulo-pagina/titulo-pagina';
 import {
@@ -13,6 +14,7 @@ import {
 
 interface Formulario {
   nome: string; nascimento: string; email: string; cpf: string; telefone: string;
+  foto: string; cep: string; cidade: string; endereco: string; inicio: string; encerramento: string; rTelefone2: string;
   rNome: string; rNascimento: string; rEmail: string; rParentesco: string; rTelefone: string; rCpf: string;
   rId?: string;
   responsaveisExtras: { id?: string; nome: string; nascimento: string; email: string; parentesco: string; telefone: string; cpf: string }[];
@@ -28,6 +30,7 @@ export function erroPlanoSaude(possuiPlano: boolean, nome: string): string | nul
 
 const VAZIO: Formulario = {
   nome: '', nascimento: '', email: '', cpf: '', telefone: '',
+  foto: '', cep: '', cidade: '', endereco: '', inicio: '', encerramento: '', rTelefone2: '',
   rNome: '', rNascimento: '', rEmail: '', rParentesco: '', rTelefone: '', rCpf: '',
   responsaveisExtras: [],
   possuiPlano: false, plano: '', carteirinha: '', validade: '', ativo: true,
@@ -36,7 +39,7 @@ const VAZIO: Formulario = {
 /** Cadastrar novo paciente ou editar um paciente existente. */
 @Component({
   selector: 'app-paciente-form',
-  imports: [Dialogo, Icone, TituloPagina],
+  imports: [Avatar, Dialogo, Icone, TituloPagina],
   templateUrl: './paciente-form.html',
 })
 export class PacienteForm {
@@ -111,6 +114,7 @@ export class PacienteForm {
       const principal = todosResponsaveis[0] ?? p.responsavel;
       this.f.set({
         nome: p.nome, nascimento: p.nascimento, email: p.email === '—' ? '' : p.email, cpf: p.cpf, telefone: p.telefone === '—' ? '' : p.telefone,
+        foto: p.foto ?? '', cep: p.cep ?? '', cidade: p.cidade ?? '', endereco: p.endereco ?? '', inicio: '', encerramento: '', rTelefone2: '',
         rId: principal.id, rNome: principal.nome === '—' ? '' : principal.nome, rNascimento: principal.nascimento ?? '',
         rEmail: principal.email ?? '', rParentesco: principal.relacao === '—' ? '' : principal.relacao,
         rTelefone: principal.telefone === '—' ? '' : principal.telefone, rCpf: principal.cpf ?? '',
@@ -181,6 +185,7 @@ export class PacienteForm {
     const paciente = await this.clinica.salvarPaciente(
       {
         nome: f.nome.trim(), nascimento: f.nascimento, email: f.email.trim(), cpf: f.cpf, telefone: f.telefone,
+        cep: f.cep, cidade: f.cidade, endereco: f.endereco,
         responsavel: { id: f.rId, nome: f.rNome.trim(), nascimento: f.rNascimento, email: f.rEmail.trim(), relacao: f.rParentesco.trim(), telefone: f.rTelefone, cpf: f.rCpf, endereco: '' },
         responsaveis: [
           { id: f.rId, nome: f.rNome.trim(), nascimento: f.rNascimento, email: f.rEmail.trim(), relacao: f.rParentesco.trim(), telefone: f.rTelefone, cpf: f.rCpf, endereco: '' },
@@ -202,5 +207,17 @@ export class PacienteForm {
 
   protected cancelar(): void {
     this.router.navigateByUrl(this.voltar());
+  }
+
+  protected erroFoto(): string { return ''; }
+
+  protected removerFoto(): void { this.f.update((atual) => ({ ...atual, foto: '' })); }
+
+  protected escolherFoto(evento: Event): void {
+    const arquivo = (evento.target as HTMLInputElement).files?.[0];
+    if (!arquivo || !arquivo.type.startsWith('image/')) return;
+    const leitor = new FileReader();
+    leitor.onload = () => this.f.update((atual) => ({ ...atual, foto: String(leitor.result ?? '') }));
+    leitor.readAsDataURL(arquivo);
   }
 }

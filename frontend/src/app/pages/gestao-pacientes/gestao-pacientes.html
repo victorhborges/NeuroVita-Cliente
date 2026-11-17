@@ -23,7 +23,7 @@
 
   <section class="cartao tabela" aria-label="Lista de pacientes">
     <div class="tabela-cab tabela-linha-ges" [class.tabela-linha-leitura]="!edita()" role="row">
-      <span>Paciente</span><span>Data de nascimento</span><span>Telefone</span><span>Profissional responsável</span><span class="centro">Status</span>
+      <span>Paciente</span><span>Data de nascimento</span><span>Telefone</span><span>Profissional responsável</span><span class="centro">Status</span><span class="centro">Prontuário</span>
       @if (edita()) { <span class="centro">Ações</span> }
     </div>
     @for (item of lista(); track item.p.id) {
@@ -36,9 +36,12 @@
           </div>
         </div>
         <span class="pac-data"><app-icone nome="calendario" /> {{ item.nascimento }}</span>
-        <span class="pac-texto">{{ item.p.telefone }}</span>
+        <span class="pac-texto">{{ item.p.telefone !== '—' ? item.p.telefone : item.p.responsavel.telefone }}</span>
         <span class="pac-texto">{{ item.profissional }}</span>
         <span class="centro"><span class="status" [class.status-acompanhamento]="item.ativo" [class.status-inativo]="!item.ativo">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></span>
+        <span class="centro">
+          <a class="botao-prontuario" [routerLink]="[base(), item.p.id]"><app-icone nome="prancheta" /> Ver prontuário</a>
+        </span>
         @if (edita()) {
           <span class="acoes-linha centro">
             <a class="acao-editar" [routerLink]="[base(), item.p.id, 'editar']" [attr.aria-label]="'Editar ' + item.p.nome" title="Editar"><app-icone nome="editar" /></a>

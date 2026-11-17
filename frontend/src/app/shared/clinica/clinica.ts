@@ -192,7 +192,7 @@ export class Clinica {
     const ultima = historico[0];
     return {
       id: p.id, codigo: p.id.slice(-5).toUpperCase(), nome: p.nome, nascimento: p.dataNascimento,
-      telefone: p.telefone ?? '', email: p.email ?? '', cpf: p.cpf ?? '', endereco: p.endereco ?? '',
+      telefone: p.telefone ?? '', email: p.email ?? '', cpf: p.cpf ?? '', endereco: p.endereco ?? '', cep: p.cep ?? '', cidade: p.cidade ?? '',
       status: p.ativo === false ? 'inativo' : 'acompanhamento', situacao: p.ativo === false ? 'Inativo' : 'Em acompanhamento', ultimaConsulta: ultima?.dataHora.slice(0, 10) ?? null,
       profissionalId: profissionalAtual,
       responsavelId: vinculo?.responsavelId,
@@ -461,7 +461,7 @@ export class Clinica {
     if (atual) {
       const editado: Paciente = {
         ...atual, nome: dados.nome, nascimento: dados.nascimento, email: dados.email, cpf: dados.cpf, telefone: dados.telefone,
-        endereco: dados.endereco ?? atual.endereco, status, situacao, plano: dados.plano,
+        endereco: dados.endereco ?? atual.endereco, cep: dados.cep ?? atual.cep, cidade: dados.cidade ?? atual.cidade, status, situacao, plano: dados.plano,
         responsavel: { ...atual.responsavel, nome: r.nome, nascimento: r.nascimento, email: r.email, relacao: r.relacao, telefone: r.telefone, cpf: r.cpf },
       };
       try {
@@ -540,7 +540,7 @@ export class Clinica {
 
   private pacienteRequest(dados: DadosPaciente, responsaveis: { responsavelId: string; grauParentesco: string }[]) {
     return {
-      nome: dados.nome, dataNascimento: dados.nascimento, email: dados.email || '', cpf: dados.cpf || '', telefone: dados.telefone || '', endereco: dados.endereco || '', ativo: dados.ativo,
+      nome: dados.nome, dataNascimento: dados.nascimento, email: dados.email || '', cpf: dados.cpf || '', telefone: dados.telefone || '', endereco: dados.endereco || '', cep: dados.cep || '', cidade: dados.cidade || '', ativo: dados.ativo,
       responsaveis,
       possuiPlanoSaude: dados.plano.possui, planoSaude: dados.plano.nome, numeroCarteirinha: dados.plano.carteirinha,
       validadePlano: dados.plano.validade || null,

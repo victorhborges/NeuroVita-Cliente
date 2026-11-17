@@ -194,6 +194,14 @@ export class Agenda {
   protected readonly horarios = computed(() =>
     horariosAgendaParaConsultas(this.consultas()),
   );
+  protected get horas(): string[] { return this.horarios(); }
+  protected readonly grade = computed(() => {
+    const horas = this.horarios();
+    const eventos = this.eventos();
+    return horas.map((hora) => this.colunas.map((coluna) => eventos.filter((evento) =>
+      evento.dia === coluna && evento.inicio.slice(0, 2) === hora.slice(0, 2),
+    )));
+  });
   protected readonly linhas = computed(() => this.horarios().map((_, i) => i));
   protected readonly colunas = [0, 1, 2, 3, 4, 5];
   protected readonly statusLista = ORDEM_STATUS;
@@ -416,6 +424,10 @@ export class Agenda {
           ...a,
           nome: paciente?.nome ?? 'Paciente',
           profNome: profissional?.nome ?? '—',
+          fim: (() => {
+            const total = minutosDe(a.inicio) + a.duracao;
+            return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+          })(),
           dia: diaDaSemana(a.data),
           linha: Math.floor((minutosDe(a.inicio) - minutosDe(this.horarios()[0])) / 30) + 2,
           trechos: Math.max(1, Math.ceil(a.duracao / 30)),

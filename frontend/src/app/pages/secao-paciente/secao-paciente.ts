@@ -2,7 +2,7 @@ import { Component, computed, ElementRef, effect, inject, input, signal, viewChi
 import { Router, RouterLink } from '@angular/router';
 
 import { Aviso } from '../../shared/aviso/aviso';
-import { anexoDe, baixarDocumento, compartilharLink, semExtensao } from '../../shared/clinica/arquivos';
+import { anexoDe, baixarDocumento, compartilharLink, ehImagem, semExtensao } from '../../shared/clinica/arquivos';
 import { Clinica } from '../../shared/clinica/clinica';
 import { Documento, Secao } from '../../shared/clinica/modelos';
 import { SECOES, secaoDoPerfil } from '../../shared/clinica/secoes';
@@ -10,8 +10,8 @@ import { FaixaPaciente } from '../../shared/faixa-paciente/faixa-paciente';
 import { Icone } from '../../shared/icone/icone';
 import { Perfil } from '../../shared/perfil';
 import { TituloPagina } from '../../shared/titulo-pagina/titulo-pagina';
-import { formatarData, normalizar, paraISO } from '../../shared/util';
-import { DocumentoLeitura } from '../documento-leitura/documento-leitura';
+import { formatarData, normalizar, paraISO, resumoTexto } from '../../shared/util';
+import { Dialogo } from '../../shared/dialogo/dialogo';
 
 /**
  * Tela de uma seção do prontuário: /:perfil/pacientes/:id/:secao
@@ -20,7 +20,7 @@ import { DocumentoLeitura } from '../documento-leitura/documento-leitura';
  */
 @Component({
   selector: 'app-secao-paciente',
-  imports: [DocumentoLeitura, FaixaPaciente, Icone, RouterLink, TituloPagina],
+  imports: [Dialogo, FaixaPaciente, Icone, RouterLink, TituloPagina],
   templateUrl: './secao-paciente.html',
   host: { '(document:click)': 'fecharMenu($event)' },
 })
@@ -51,7 +51,39 @@ export class SecaoPaciente {
   protected readonly tipoFiltro = signal('');
   protected readonly busca = signal('');
   protected readonly menuNovo = signal(false);
+  protected readonly filtroDoc = signal('');
+  protected readonly grupoEnvio = signal('');
+  protected readonly escolhendoGrupo = signal(false);
   protected readonly hoje = paraISO(new Date());
+
+  private paraCartao(doc: Documento) {
+    const arquivo = doc.arquivo;
+    const imagem = !!arquivo && ehImagem(arquivo.nome);
+    return {
+      doc,
+      dataBR: formatarData(doc.dataSessao),
+      imagem,
+      miniatura: arquivo ? (imagem ? arquivo.url : '') : resumoTexto(doc.conteudo),
+    };
+  }
+
+  protected readonly galeria = computed(() => {
+    const todos = this.clinica.documentosDe(this.id(), this.secaoValida() ?? undefined).map((d) => this.paraCartao(d));
+    const elegido = this.filtroDoc();
+    const visibles = elegido ? todos.filter((c) => c.doc.id === elegido) : todos;
+    const grupos = this.cfg().grupos;
+    return {
+      todos,
+      total: visibles.length,
+      grupos: grupos ? grupos.map((rotulo) => ({
+        rotulo,
+        itens: visibles.filter((c) => ((c.doc as Documento & { grupo?: string }).grupo ?? grupos[0]) === rotulo),
+      })) : [
+        { rotulo: 'Fotos de documentos de identificação do paciente', itens: visibles.filter((c) => !!c.doc.arquivo) },
+        { rotulo: 'Documentos escritos no sistema', itens: visibles.filter((c) => !c.doc.arquivo) },
+      ].filter((grupo) => grupo.itens.length),
+    };
+  });
 
   protected readonly itens = computed(() => {
     const termo = normalizar(this.busca());
@@ -83,6 +115,15 @@ export class SecaoPaciente {
 
   protected escolherArquivo(): void {
     this.menuNovo.set(false);
+    if ((this.cfg().grupos?.length ?? 0) > 1) {
+      this.escolhendoGrupo.set(true);
+      return;
+    }
+    this.arquivoCampo()?.nativeElement.click();
+  }
+
+  protected confirmarGrupo(): void {
+    this.escolhendoGrupo.set(false);
     this.arquivoCampo()?.nativeElement.click();
   }
 

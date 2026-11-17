@@ -2,8 +2,111 @@
   <div class="pg">
     <app-titulo-pagina titulo="Página não encontrada" subtitulo="Esse paciente ou essa seção não existe." [voltarPara]="raiz() + '/pacientes'" />
   </div>
-} @else if (cfg().modo === 'leitura') {
-  <app-documento-leitura [id]="id()" [secao]="cfg().id" [perfil]="perfil()" />
+} @else if (cfg().modo === 'galeria' && cfg().galeria; as g) {
+  <div class="pg">
+    <app-titulo-pagina [titulo]="g.titulo" [subtitulo]="g.subtitulo" [voltarPara]="raiz() + '/pacientes/' + id()">
+      @if (g.variante === 'b') {
+        <button type="button" class="botao-contorno botao-com-icone" (click)="escolherArquivo()">+ Adicionar documentos</button>
+      }
+      @if (cfg().grupos) {
+        <label class="gal-seletor">
+          <select aria-label="Selecionar documento" (change)="filtroDoc.set($any($event.target).value)">
+            <option value="" [selected]="!filtroDoc()">{{ filtroDoc() ? 'Mostrar todos os documentos' : 'Selecionar documento' }}</option>
+            @for (c of galeria().todos; track c.doc.id) {
+              <option [value]="c.doc.id" [selected]="c.doc.id === filtroDoc()">{{ c.doc.titulo }} · {{ c.dataBR }}</option>
+            }
+          </select>
+          <app-icone nome="seta-baixo" />
+        </label>
+      } @else {
+        <a class="botao-escuro" [routerLink]="[raiz(), 'pacientes', id(), cfg().id, 'novo']">{{ cfg().botaoNovo }}</a>
+      }
+    </app-titulo-pagina>
+
+    <app-faixa-paciente [paciente]="paciente()!" [secao]="cfg().id" [perfil]="perfil()" [botaoAdicionar]="g.variante === 'a'" (adicionar)="escolherArquivo()" />
+
+    <input #arquivo type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" class="oculto" aria-label="Adicionar documentos" (change)="aoEnviar($event)" />
+
+    <app-dialogo [aberto]="escolhendoGrupo()" titulo="Adicionar em qual grupo?" textoConfirmar="Escolher arquivos" (cancelar)="escolhendoGrupo.set(false)" (confirmar)="confirmarGrupo()">
+      <fieldset class="radios radios-coluna">
+        @for (gr of cfg().grupos ?? []; track gr) {
+          <label class="radio"><input type="radio" name="grupo-envio" [checked]="gr === (grupoEnvio() || (cfg().grupos ?? [''])[0])" (change)="grupoEnvio.set(gr)" /><span class="radio-bolinha"></span> {{ gr }}</label>
+        }
+      </fieldset>
+    </app-dialogo>
+
+    <div class="doc-grade doc-grade-lista" [class.doc-grade-solo]="g.variante === 'a'">
+      <section class="cartao gal-cartao">
+        @if (!cfg().grupos) {
+        <div class="gal-topo">
+          <h2 class="gal-titulo">{{ g.tituloCartao }}</h2>
+          <label class="gal-seletor">
+            <select aria-label="Selecionar documento" (change)="filtroDoc.set($any($event.target).value)">
+              <option value="" [selected]="!filtroDoc()">{{ filtroDoc() ? 'Mostrar todos os documentos' : 'Selecionar documento' }}</option>
+              @for (c of galeria().todos; track c.doc.id) {
+                <option [value]="c.doc.id" [selected]="c.doc.id === filtroDoc()">{{ c.doc.titulo }} · {{ c.dataBR }}</option>
+              }
+            </select>
+            <app-icone nome="seta-baixo" />
+          </label>
+        </div>
+        }
+
+        @for (grupo of galeria().grupos; track grupo.rotulo) {
+          <section class="gal-grupo" [class.gal-grupo-plano]="!!cfg().grupos" [attr.aria-label]="grupo.rotulo">
+            @if (cfg().grupos) { <h2 class="gal-grupo-titulo">{{ grupo.rotulo }}</h2> } @else { <p class="gal-rotulo">{{ grupo.rotulo }}</p> }
+            @if (cfg().subtituloGrupos; as legenda) { <p class="gal-rotulo gal-legenda">{{ legenda }}</p> }
+            <ul class="gal-grade">
+              @for (item of grupo.itens; track item.doc.id) {
+                <li class="gal-item">
+                  @if (item.doc.arquivo; as arq) {
+                    <a class="gal-miniatura" [href]="arq.url" target="_blank" rel="noopener" [attr.aria-label]="'Abrir ' + item.doc.titulo">
+                      @if (item.imagem) { <img [src]="arq.url" [alt]="item.doc.titulo" loading="lazy" /> } @else { <app-icone nome="nuvem-baixar" class="gal-nuvem" /> }
+                    </a>
+                  } @else {
+                    <a class="gal-miniatura gal-miniatura-texto" [routerLink]="[raiz(), 'pacientes', id(), cfg().id, item.doc.id]" [attr.aria-label]="'Abrir ' + item.doc.titulo">
+                      <span>{{ item.miniatura }}</span>
+                    </a>
+                  }
+                  <div class="gal-rodape">
+                    <div class="gal-dados">
+                      @if (item.doc.arquivo; as arq) {
+                        <a class="gal-nome" [href]="arq.url" target="_blank" rel="noopener" [attr.title]="item.doc.titulo">{{ item.doc.titulo }}</a>
+                      } @else {
+                        <a class="gal-nome" [routerLink]="[raiz(), 'pacientes', id(), cfg().id, item.doc.id]" [attr.title]="item.doc.titulo">{{ item.doc.titulo }}</a>
+                      }
+                      <span class="gal-data">{{ item.dataBR }}</span>
+                    </div>
+                    <button type="button" class="gal-baixar" [attr.aria-label]="'Baixar ' + item.doc.titulo" title="Baixar" (click)="baixar(item.doc)"><app-icone nome="baixar" /></button>
+                  </div>
+                </li>
+              }
+            </ul>
+            @if (!grupo.itens.length) { <p class="gal-grupo-vazio">Nenhum documento neste grupo.</p> }
+          </section>
+        } @empty {
+          <p class="tabela-vazio">{{ cfg().vazioLista }} Use "+ Adicionar documentos" ou "{{ cfg().botaoNovo }}".</p>
+        }
+      </section>
+
+      @if (g.variante === 'b') {
+        <aside class="doc-lateral">
+          <section class="cartao doc-dados">
+            <h2 class="doc-lateral-titulo"><app-icone nome="usuario" /> Dados do Paciente</h2>
+            <ul>
+              @for (d of dados(); track d.rotulo) {
+                <li><app-icone [nome]="d.icone" /><span><strong>{{ d.rotulo }}</strong><small>{{ d.valor }}</small></span></li>
+              }
+            </ul>
+          </section>
+          <div class="doc-info">
+            <p class="doc-info-titulo"><app-icone nome="relogio" /> Informações importantes</p>
+            <p class="doc-info-texto">{{ cfg().informacao }}</p>
+          </div>
+        </aside>
+      }
+    </div>
+  </div>
 } @else {
   <div class="pg">
     <app-titulo-pagina [titulo]="cfg().rotulo" subtitulo="Histórico e informações do paciente" [voltarPara]="raiz() + '/pacientes/' + id()">
@@ -37,7 +140,7 @@
 
         @if (cfg().filtros === 'data-busca') {
           <div class="doc-filtros">
-            <label class="campo-mini">{{ cfg().id === 'exames' ? 'Data da solicitação' : 'Data da sessão' }}
+            <label class="campo-mini">Data da sessão
               <input type="date" [max]="hoje" [value]="dataFiltro()" (input)="dataFiltro.set($any($event.target).value)" />
             </label>
             <label class="campo-busca-mini">

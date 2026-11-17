@@ -35,7 +35,6 @@ import { dataExtensa, formatarData } from '../../shared/util';
     AgendaDoDia,
     Banner,
     Cabecalho,
-    Calendario,
     CardsResumo,
     Icone,
     ProximasConsultas,
