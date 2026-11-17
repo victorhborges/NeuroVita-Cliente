@@ -183,7 +183,7 @@ export class Clinica {
       const contato = responsaveis.find((item) => item.id === link.responsavelId);
       return {
         id: link.responsavelId, nome: contato?.nome ?? '', relacao: link.grauParentesco,
-        telefone: contato?.telefone ?? '', endereco: contato?.endereco ?? '',
+        telefone: contato?.telefone ?? '', telefoneSecundario: contato?.telefoneSecundario ?? '', endereco: contato?.endereco ?? '',
         email: contato?.email, nascimento: contato?.dataNascimento, cpf: contato?.cpf,
       };
     });
@@ -192,11 +192,13 @@ export class Clinica {
     const ultima = historico[0];
     return {
       id: p.id, codigo: p.id.slice(-5).toUpperCase(), nome: p.nome, nascimento: p.dataNascimento,
-      telefone: p.telefone ?? '', email: p.email ?? '', cpf: p.cpf ?? '', endereco: p.endereco ?? '', cep: p.cep ?? '', cidade: p.cidade ?? '',
+      telefone: p.telefone ?? '', email: p.email ?? '', cpf: p.cpf ?? '', endereco: p.endereco ?? '',
+      numeroEndereco: p.numeroEndereco, complemento: p.complemento, bairro: p.bairro, cep: p.cep ?? '', cidade: p.cidade ?? '',
+      dataInicio: p.dataInicio ?? null, dataEncerramento: p.dataEncerramento ?? null,
       status: p.ativo === false ? 'inativo' : 'acompanhamento', situacao: p.ativo === false ? 'Inativo' : 'Em acompanhamento', ultimaConsulta: ultima?.dataHora.slice(0, 10) ?? null,
       profissionalId: profissionalAtual,
       responsavelId: vinculo?.responsavelId,
-      responsavel: { nome: r?.nome ?? '', relacao: vinculo?.grauParentesco ?? '', telefone: r?.telefone ?? '', endereco: r?.endereco ?? '', email: r?.email, nascimento: r?.dataNascimento, cpf: r?.cpf },
+      responsavel: { nome: r?.nome ?? '', relacao: vinculo?.grauParentesco ?? '', telefone: r?.telefone ?? '', telefoneSecundario: r?.telefoneSecundario, endereco: r?.endereco ?? '', email: r?.email, nascimento: r?.dataNascimento, cpf: r?.cpf },
       responsaveis: contatos,
       plano: { possui: !!p.possuiPlanoSaude, nome: p.planoSaude ?? '', carteirinha: p.numeroCarteirinha ?? '', validade: p.validadePlano ?? '' },
       diagnostico: { principal: '—', cid: '—', inicioTratamento: null }, consultas: historico.map((c) => ({
@@ -468,7 +470,7 @@ export class Clinica {
         for (const contato of informadosValidos) {
           const request = {
             nome: contato.nome.trim(), cpf: contato.cpf || '', email: contato.email || '',
-            telefone: contato.telefone || '', dataNascimento: contato.nascimento || undefined,
+            telefone: contato.telefone || '', telefoneSecundario: contato.telefoneSecundario || undefined, dataNascimento: contato.nascimento || undefined,
             endereco: contato.endereco || dados.endereco || undefined,
           };
           const salvo = contato.id
@@ -501,7 +503,7 @@ export class Clinica {
       for (const contato of informadosValidos) {
         const salvo = await firstValueFrom(this.responsaveisApi.criar({
           nome: contato.nome.trim(), cpf: contato.cpf || '', email: contato.email || '',
-          telefone: contato.telefone || '', dataNascimento: contato.nascimento || undefined,
+          telefone: contato.telefone || '', telefoneSecundario: contato.telefoneSecundario || undefined, dataNascimento: contato.nascimento || undefined,
           endereco: contato.endereco || dados.endereco || undefined,
         }));
         responsaveisCriadosNestaOperacao.push(salvo.id);
@@ -540,7 +542,10 @@ export class Clinica {
 
   private pacienteRequest(dados: DadosPaciente, responsaveis: { responsavelId: string; grauParentesco: string }[]) {
     return {
-      nome: dados.nome, dataNascimento: dados.nascimento, email: dados.email || '', cpf: dados.cpf || '', telefone: dados.telefone || '', endereco: dados.endereco || '', cep: dados.cep || '', cidade: dados.cidade || '', ativo: dados.ativo,
+      nome: dados.nome, dataNascimento: dados.nascimento, email: dados.email || undefined, cpf: dados.cpf || undefined, telefone: dados.telefone || undefined, endereco: dados.endereco || '',
+      numeroEndereco: dados.numeroEndereco || undefined, complemento: dados.complemento || undefined, bairro: dados.bairro || undefined,
+      dataInicio: dados.dataInicio || undefined, dataEncerramento: dados.dataEncerramento || undefined,
+      cep: dados.cep || '', cidade: dados.cidade || '', ativo: dados.ativo,
       responsaveis,
       possuiPlanoSaude: dados.plano.possui, planoSaude: dados.plano.nome, numeroCarteirinha: dados.plano.carteirinha,
       validadePlano: dados.plano.validade || null,

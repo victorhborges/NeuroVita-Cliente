@@ -24,6 +24,11 @@ public class ResponsavelRequest {
         message = "Informe um telefone válido."
     )
     private String telefone;
+    @Pattern(
+        regexp = "^[0-9()+.\\- ]{10,20}$",
+        message = "Informe um telefone secundário válido."
+    )
+    private String telefoneSecundario;
     private LocalDate dataNascimento;
     private String endereco;
 
@@ -61,6 +66,9 @@ public class ResponsavelRequest {
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
+
+    public String getTelefoneSecundario() { return telefoneSecundario; }
+    public void setTelefoneSecundario(String telefoneSecundario) { this.telefoneSecundario = telefoneSecundario; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }

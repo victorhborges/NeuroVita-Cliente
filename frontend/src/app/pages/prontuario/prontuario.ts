@@ -27,6 +27,17 @@ export class Prontuario {
 
   protected readonly paciente = computed(() => this.clinica.paciente(this.id()));
   protected readonly nascimento = computed(() => formatarData(this.paciente()?.nascimento));
+  protected readonly enderecoCompleto = computed(() => {
+    const p = this.paciente();
+    return [p?.endereco, p?.numeroEndereco, p?.complemento, p?.bairro, p?.cidade, p?.cep]
+      .map((valor) => valor?.trim())
+      .filter((valor): valor is string => !!valor)
+      .join(', ') || '—';
+  });
+  protected readonly telefoneResponsavel = computed(() => {
+    const r = this.paciente()?.responsavel;
+    return [r?.telefone, r?.telefoneSecundario].filter((valor) => !!valor?.trim()).join(' / ') || '—';
+  });
   protected readonly secoes = computed(() => secoesDoPerfil(this.perfil()).map((id) => SECOES[id]));
   protected readonly consultas = computed(() =>
     (this.paciente()?.consultas ?? []).map((c) => ({ ...c, dataBR: formatarData(c.data) })),

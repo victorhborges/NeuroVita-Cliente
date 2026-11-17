@@ -1,45 +1,24 @@
 <section class="cartao agenda">
   <header class="cartao-topo">
-    <h2 class="cartao-titulo">Agenda do dia</h2>
-    <span class="agenda-data">
-      {{ data() }}
-      <app-icone nome="calendario" />
-    </span>
+    <h2 class="cartao-titulo"><app-icone nome="calendario" /> Agenda do dia</h2>
   </header>
 
-  <ul class="agenda-lista" [class.agenda-lista-rolagem]="itens().length > 7">
-    @for (item of itens(); track item.hora) {
-      <li class="agenda-linha" [class.agenda-linha-com-menu]="menuAcoes()">
-        <span class="agenda-hora">{{ item.hora }}</span>
-        <div class="agenda-info">
-          <span class="linha-nome">{{ item.paciente }}</span>
-          <span class="linha-tipo">{{ item.tipo }}</span>
-        </div>
-        @if (item.status) {
-          <app-chip-status [status]="item.status" />
-        } @else if (item.tag) {
-          <app-tag-diagnostico [tag]="item.tag" />
+  <div class="agenda-tabela-rolagem">
+    <table class="agenda-tabela">
+      <thead><tr><th>Horário</th><th>Paciente</th><th>Telefone</th><th>Profissional</th><th>Status</th></tr></thead>
+      <tbody>
+        @for (item of itens(); track item.hora + item.paciente) {
+          <tr>
+            <td><span class="agenda-hora"><app-icone nome="relogio" /> {{ item.hora }}</span></td>
+            <td><span class="agenda-paciente"><app-avatar [nome]="item.paciente" /> {{ item.paciente }}</span></td>
+            <td>{{ item.telefone || '—' }}</td>
+            <td>{{ item.profissional || '—' }}</td>
+            <td>@if (item.status) { <app-chip-status [status]="item.status" /> } @else { — }</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="agenda-vazia">Nenhum atendimento agendado para hoje.</td></tr>
         }
-        @if (menuAcoes()) {
-          <!-- TODO: abrir as ações da consulta (editar, remarcar, cancelar). -->
-          <button type="button" class="botao-pontinhos" aria-label="Mais ações">
-            <app-icone nome="pontinhos" />
-          </button>
-        }
-      </li>
-    }
-  </ul>
-
-  @if (rota(); as destino) {
-    <a class="cartao-rodape" [routerLink]="destino">
-      Ver agenda completa
-      <app-icone nome="seta-longa" />
-    </a>
-  } @else {
-    <!-- TODO: ligar à tela de Agenda deste perfil. -->
-    <button type="button" class="cartao-rodape">
-      Ver agenda completa
-      <app-icone nome="seta-longa" />
-    </button>
-  }
+      </tbody>
+    </table>
+  </div>
 </section>

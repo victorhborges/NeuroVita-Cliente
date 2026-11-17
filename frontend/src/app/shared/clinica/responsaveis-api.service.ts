@@ -8,6 +8,7 @@ export interface ResponsavelApi {
     cpf: string;
     email: string;
     telefone: string;
+    telefoneSecundario?: string;
     dataNascimento?: string;
     endereco?: string;
 }

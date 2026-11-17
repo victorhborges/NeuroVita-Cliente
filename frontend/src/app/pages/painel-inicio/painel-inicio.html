@@ -21,13 +21,5 @@
       }
     </div>
 
-    <div class="painel-colunas">
-      <div class="painel-coluna">
-        <app-agenda-do-dia [itens]="agenda()" [data]="dataAgenda()" [menuAcoes]="config().menuAcoes" [rota]="rotaAgenda()" />
-      </div>
-      <div class="painel-coluna">
-        <app-proximas-consultas [consultas]="proximas()" [menuAcoes]="config().menuAcoes" [rota]="rotaAgenda()" />
-        <app-banner [variante]="config().banner.variante" [titulo]="config().banner.titulo" [texto]="config().banner.texto" />
-      </div>
-    </div>
+    <app-agenda-do-dia [itens]="agenda()" />
 </div>

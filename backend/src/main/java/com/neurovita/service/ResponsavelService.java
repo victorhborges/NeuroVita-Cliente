@@ -124,6 +124,8 @@ public class ResponsavelService {
             responsavel.setEmail(email);
         if (!atualizacaoParcial || request.getTelefone() != null)
             responsavel.setTelefone(normalizarTexto(request.getTelefone()));
+        if (!atualizacaoParcial || request.getTelefoneSecundario() != null)
+            responsavel.setTelefoneSecundario(normalizarTexto(request.getTelefoneSecundario()));
         if (!atualizacaoParcial || request.getDataNascimento() != null)
             responsavel.setDataNascimento(request.getDataNascimento());
         if (!atualizacaoParcial || request.getEndereco() != null)

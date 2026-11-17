@@ -39,19 +39,16 @@ export class GestaoPacientes {
       .map((p) => ({
         p,
         idade: idadeDe(p.nascimento),
-        nascimento: formatarData(p.nascimento),
-        profissional: this.clinica.profissional(p.profissionalId)?.nome ?? '—',
+        ultimaConsulta: formatarData(p.ultimaConsulta),
         ativo: p.status !== 'inativo',
       }));
   });
 
   protected readonly cards = computed<{ valor: number; rotulo: string; icone: NomeIcone }[]>(() => {
     const pacientes = this.clinica.pacientes();
-    const avaliacoes = this.clinica.documentos().filter((d) => d.secao === 'avaliacoes').length;
     return [
       { valor: pacientes.length, rotulo: 'Pacientes\nCadastrados', icone: 'usuarios' },
-      { valor: pacientes.filter((p) => p.status !== 'inativo').length, rotulo: 'Pacientes\nem tratamento', icone: 'check-grande' },
-      { valor: avaliacoes, rotulo: 'Avaliações\nrealizadas', icone: 'prancheta' },
+      { valor: pacientes.filter((p) => p.status !== 'inativo').length, rotulo: 'Pacientes\nAtivos', icone: 'check-grande' },
     ];
   });
 

@@ -16,6 +16,8 @@ export interface ItemAgenda {
   hora: string;
   paciente: string;
   tipo: string;
+  telefone?: string;
+  profissional?: string;
   /** TEA / TDAH (telas com dados de protótipo). */
   tag?: Tag;
   /** Status da consulta (telas ligadas à agenda de verdade). */

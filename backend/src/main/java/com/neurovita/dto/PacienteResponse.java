@@ -16,6 +16,11 @@ public class PacienteResponse {
     private String cpf;
     private String telefone;
     private String endereco;
+    private String numeroEndereco;
+    private String complemento;
+    private String bairro;
+    private LocalDate dataInicio;
+    private LocalDate dataEncerramento;
     private String cep;
     private String cidade;
     private Boolean ativo;
@@ -46,6 +51,11 @@ public class PacienteResponse {
         this.cpf = paciente.getCpf();
         this.telefone = paciente.getTelefone();
         this.endereco = paciente.getEndereco();
+        this.numeroEndereco = paciente.getNumeroEndereco();
+        this.complemento = paciente.getComplemento();
+        this.bairro = paciente.getBairro();
+        this.dataInicio = paciente.getDataInicio();
+        this.dataEncerramento = paciente.getDataEncerramento();
         this.cep = paciente.getCep();
         this.cidade = paciente.getCidade();
         this.ativo = paciente.getAtivo();
@@ -89,6 +99,11 @@ public class PacienteResponse {
     }
 
     public String getEndereco() { return endereco; }
+    public String getNumeroEndereco() { return numeroEndereco; }
+    public String getComplemento() { return complemento; }
+    public String getBairro() { return bairro; }
+    public LocalDate getDataInicio() { return dataInicio; }
+    public LocalDate getDataEncerramento() { return dataEncerramento; }
     public String getCep() { return cep; }
     public String getCidade() { return cidade; }
     public Boolean getAtivo() { return ativo; }

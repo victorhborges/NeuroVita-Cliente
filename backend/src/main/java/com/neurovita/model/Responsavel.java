@@ -14,6 +14,7 @@ public class Responsavel {
     private String cpf;
     private String email;
     private String telefone;
+    private String telefoneSecundario;
     private LocalDate dataNascimento;
     private String endereco;
 
@@ -55,6 +56,9 @@ public class Responsavel {
     public String getTelefone() {
         return telefone;
     }
+
+    public String getTelefoneSecundario() { return telefoneSecundario; }
+    public void setTelefoneSecundario(String telefoneSecundario) { this.telefoneSecundario = telefoneSecundario; }
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;

@@ -1,6 +1,7 @@
 import { Component, ElementRef, inject, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
+import { Auth } from '../auth';
 import { Avatar } from '../avatar/avatar';
 import { Icone } from '../icone/icone';
 import { ConfigPerfil } from '../perfil';
@@ -8,7 +9,7 @@ import { ConfigPerfil } from '../perfil';
 /** Topo da tela: saudação à esquerda, sino e usuário à direita. */
 @Component({
   selector: 'app-cabecalho',
-  imports: [Avatar, Icone, RouterLink],
+  imports: [Avatar, Icone],
   templateUrl: './cabecalho.html',
   host: { '(document:click)': 'fecharSeClicouFora($event)' },
 })
@@ -17,9 +18,17 @@ export class Cabecalho {
 
   protected readonly menuAberto = signal(false);
   private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
 
   protected alternarMenu(): void {
     this.menuAberto.update((aberto) => !aberto);
+  }
+
+  protected sair(): void {
+    this.menuAberto.set(false);
+    this.auth.sair();
+    this.router.navigateByUrl('/');
   }
 
   protected fecharSeClicouFora(evento: Event): void {

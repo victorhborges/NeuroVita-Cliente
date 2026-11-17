@@ -168,6 +168,11 @@ public class PacienteService {
         if (request.getCpf() != null) paciente.setCpf(request.getCpf());
         if (request.getTelefone() != null) paciente.setTelefone(request.getTelefone());
         if (request.getEndereco() != null) paciente.setEndereco(request.getEndereco());
+        if (request.getNumeroEndereco() != null) paciente.setNumeroEndereco(request.getNumeroEndereco());
+        if (request.getComplemento() != null) paciente.setComplemento(request.getComplemento());
+        if (request.getBairro() != null) paciente.setBairro(request.getBairro());
+        if (request.getDataInicio() != null) paciente.setDataInicio(request.getDataInicio());
+        if (request.getDataEncerramento() != null) paciente.setDataEncerramento(request.getDataEncerramento());
         if (request.getCep() != null && !request.getCep().isBlank()) {
                 paciente.setCep(request.getCep());
         }

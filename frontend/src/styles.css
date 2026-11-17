@@ -609,6 +609,20 @@ app-avatar {
 }
 .agenda-info { display: flex; min-width: 0; flex-direction: column; }
 
+/* Painel inicial conforme o quadro oficial do MVP Cliente. */
+.agenda .cartao-titulo { display: flex; align-items: center; gap: 0.55rem; }
+.agenda .cartao-titulo app-icone { font-size: 1.25rem; }
+.agenda-tabela-rolagem { overflow-x: auto; }
+.agenda-tabela { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.agenda-tabela th, .agenda-tabela td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--painel-borda); text-align: left; white-space: nowrap; }
+.agenda-tabela th { font-weight: 600; }
+.agenda-tabela tbody tr:last-child td { border-bottom: 0; }
+.agenda-hora { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.5rem; border-radius: 0.45rem; background: var(--painel-cinza); font-size: 0.78rem; font-weight: 600; }
+.agenda-hora app-icone { font-size: 0.95rem; }
+.agenda-paciente { display: inline-flex; align-items: center; gap: 0.5rem; }
+.agenda-paciente app-avatar { --avatar: 1.9rem; }
+.agenda-vazia { padding: 1.5rem 1rem !important; text-align: center !important; color: var(--painel-suave); }
+
 /* ---------- Próximas consultas ---------- */
 .proximas-ver-todas { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; font-weight: 600; }
 .proximas-ver-todas app-icone { font-size: 1.25rem; }
@@ -756,7 +770,7 @@ app-avatar {
 .pg-busca app-icone { font-size: 1.1rem; }
 
 /* ---------- Pacientes ---------- */
-.pac-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 15.5rem)); justify-content: start; gap: 1rem; }
+.pac-cards { display: grid; grid-template-columns: repeat(2, minmax(15rem, 22rem)); justify-content: start; gap: 1rem; }
 .pac-card { display: flex; align-items: center; gap: 1rem; padding: 1.1rem; }
 .pac-card-icone {
   display: flex; width: 4.5rem; height: 4.5rem; flex-shrink: 0; align-items: center; justify-content: center;
@@ -775,6 +789,14 @@ app-avatar {
 .pac-nome app-avatar { --avatar: 2.6rem; }
 .pac-data { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #4b5563; }
 .pac-data app-icone { font-size: 1rem; }
+.tabela-linha-pac-lista { display: grid; grid-template-columns: minmax(15rem, 2.3fr) minmax(9rem, 1.15fr) minmax(6rem, 0.8fr) minmax(9.5rem, 1.25fr) minmax(5.5rem, 0.65fr); align-items: center; gap: 0.75rem; padding: 0.7rem 1.1rem; }
+.tabela-linha-pac-lista:not(.tabela-pac-edita) { grid-template-columns: minmax(15rem, 2.3fr) minmax(9rem, 1.15fr) minmax(6rem, 0.8fr) minmax(9.5rem, 1.25fr); }
+@media (max-width: 800px) {
+  .tabela-linha-pac-lista { grid-template-columns: minmax(10rem, 1.7fr) minmax(8rem, 1fr) minmax(5rem, 0.8fr); }
+  .tabela-linha-pac-lista > :nth-child(2), .tabela-linha-pac-lista > :nth-child(3) { display: none; }
+  .pac-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) { .pac-cards { grid-template-columns: minmax(0, 1fr); } }
 .tabela-vazio { padding: 1.5rem 1.1rem; text-align: center; font-size: 0.9rem; color: var(--painel-suave); }
 .status {
   display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.7rem; border: 1.5px solid; border-radius: 0.5rem;

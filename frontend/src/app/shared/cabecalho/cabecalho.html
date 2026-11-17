@@ -27,11 +27,10 @@
 
       @if (menuAberto()) {
         <div class="topo-menu" role="menu">
-          <!-- TODO: encerrar a sessão de verdade quando o login for ligado ao back-end. -->
-          <a class="topo-menu-item" role="menuitem" routerLink="/">
+          <button type="button" class="topo-menu-item" role="menuitem" (click)="sair()">
             <app-icone nome="sair" />
             Sair
-          </a>
+          </button>
         </div>
       }
     } @else {

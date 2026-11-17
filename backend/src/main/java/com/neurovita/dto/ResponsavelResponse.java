@@ -10,6 +10,7 @@ public class ResponsavelResponse {
     private String cpf;
     private String email;
     private String telefone;
+    private String telefoneSecundario;
     private LocalDate dataNascimento;
     private String endereco;
 
@@ -19,6 +20,7 @@ public class ResponsavelResponse {
         this.cpf = responsavel.getCpf();
         this.email = responsavel.getEmail();
         this.telefone = responsavel.getTelefone();
+        this.telefoneSecundario = responsavel.getTelefoneSecundario();
         this.dataNascimento = responsavel.getDataNascimento();
         this.endereco = responsavel.getEndereco();
     }
@@ -42,6 +44,8 @@ public class ResponsavelResponse {
     public String getTelefone() {
         return telefone;
     }
+
+    public String getTelefoneSecundario() { return telefoneSecundario; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public String getEndereco() { return endereco; }

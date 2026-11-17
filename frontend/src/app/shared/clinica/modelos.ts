@@ -11,6 +11,7 @@ export interface Responsavel {
   nome: string;
   relacao: string;
   telefone: string;
+  telefoneSecundario?: string;
   endereco: string;
   email?: string;
   /** 'aaaa-mm-dd' */
@@ -45,8 +46,13 @@ export interface Paciente {
   email: string;
   cpf: string;
   endereco: string;
+  numeroEndereco?: string;
+  complemento?: string;
+  bairro?: string;
   cep?: string;
   cidade?: string;
+  dataInicio?: string | null;
+  dataEncerramento?: string | null;
   status: StatusPaciente;
   /** Texto mostrado no prontuário (ex.: "Em andamento"). */
   situacao: string;
@@ -68,6 +74,11 @@ export interface DadosPaciente {
   email: string;
   cpf: string;
   telefone: string;
+  numeroEndereco?: string;
+  complemento?: string;
+  bairro?: string;
+  dataInicio?: string;
+  dataEncerramento?: string;
   cep?: string;
   cidade?: string;
   endereco?: string;

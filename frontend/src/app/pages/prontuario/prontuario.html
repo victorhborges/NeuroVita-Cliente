@@ -11,13 +11,13 @@
           <dl class="pront-dados">
             <dt>Nascimento:</dt><dd>{{ nascimento() }}</dd>
             <dt>CPF:</dt><dd>{{ p.cpf }}</dd>
-            <dt>Endereço:</dt><dd>{{ p.endereco }}</dd>
+            <dt>Endereço:</dt><dd>{{ enderecoCompleto() }}</dd>
           </dl>
           <h2 class="pront-titulo pront-titulo-2"><app-icone nome="usuario" /> Responsável</h2>
           <dl class="pront-dados">
             <dt>Nome</dt><dd>{{ p.responsavel.nome }}</dd>
             <dt>Relação</dt><dd>{{ p.responsavel.relacao }}</dd>
-            <dt>Telefone</dt><dd>{{ p.responsavel.telefone }}</dd>
+            <dt>Telefone</dt><dd>{{ telefoneResponsavel() }}</dd>
             <dt>E-mail</dt><dd>{{ p.responsavel.email || '—' }}</dd>
           </dl>
         </section>
